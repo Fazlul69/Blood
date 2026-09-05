@@ -17,6 +17,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use(express.static(path.join(__dirname, "..", "..", "admin", "dist")));
+
 app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
@@ -40,4 +42,15 @@ startCronJobs();
 const port = Number(process.env.PORT ?? 4000);
 httpServer.listen(port, () => {
   console.log(`Blood backend listening on http://localhost:${port}`);
+});
+
+
+// Add SPA fallback (for React Router): redirect 404s on non-API/uploads to index.html
+app.get("*", (req, res) => {
+  // Don't redirect API or uploads 404s
+  if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  // Serve index.html for all other routes (client-side routing)
+  res.sendFile(path.join(__dirname, "..", "..", "admin", "dist", "index.html"));
 });
