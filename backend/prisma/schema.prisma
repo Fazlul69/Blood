@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum UserStatus {
+  active
+  banned
+}
+
+enum BloodGroup {
+  A_POS
+  A_NEG
+  B_POS
+  B_NEG
+  AB_POS
+  AB_NEG
+  O_POS
+  O_NEG
+}
+
+model User {
+  id                Int        @id @default(autoincrement())
+  phone             String     @unique
+  username          String     @unique
+  name              String
+  gender            String?
+  bloodGroup        BloodGroup
+  photoUrl          String?
+  lat               Float?
+  lng               Float?
+  addressText       String?
+  showPhone         Boolean    @default(false)
+  allowChat         Boolean    @default(true)
+  lastDonationDate  DateTime?
+  lastAntibioticDate DateTime?
+  role              Role       @default(user)
+  status            UserStatus @default(active)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  donationHistory DonationHistory[]
+  deviceTokens    DeviceToken[]
+  chatsAsA        Chat[]            @relation("ChatUserA")
+  chatsAsB        Chat[]            @relation("ChatUserB")
+  messages        Message[]
+
+  @@index([lat, lng])
+  @@index([bloodGroup])
+}
+
+model DonationHistory {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  donationDate DateTime
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Chat {
+  id        Int      @id @default(autoincrement())
+  userAId   Int
+  userBId   Int
+  createdAt DateTime @default(now())
+
+  userA    User      @relation("ChatUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB    User      @relation("ChatUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([userAId, userBId])
+}
+
+model Message {
+  id       Int       @id @default(autoincrement())
+  chatId   Int
+  senderId Int
+  body     String    @db.Text
+  sentAt   DateTime  @default(now())
+  readAt   DateTime?
+
+  chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender User @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, sentAt])
+}
+
+model DeviceToken {
+  id             Int    @id @default(autoincrement())
+  userId         Int
+  expoPushToken  String @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AppSetting {
+  key   String @id
+  value String
+}
+
+/// Mock OTP store. NOT real SMS delivery — see routes/auth.ts. Swap this out for a
+/// real SMS provider (Twilio Verify, MSG91, etc.) once user volume justifies the cost.
+model OtpCode {
+  id        Int      @id @default(autoincrement())
+  phone     String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
