@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "Blood Donor Finder",
+    "slug": "blood-donor-finder",
+    "scheme": "blooddonor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.blooddonorfinder.app",
+      "config": {
+        "googleMapsApiKey": "REPLACE_WITH_IOS_GOOGLE_MAPS_API_KEY"
+      }
+    },
+    "android": {
+      "package": "com.blooddonorfinder.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "config": {
+        "googleMaps": {
+          "apiKey": "REPLACE_WITH_ANDROID_GOOGLE_MAPS_API_KEY"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Blood Donor Finder uses your location to show nearby donors on the map and let others find you."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Blood Donor Finder needs access to your photos so you can set a profile picture.",
+          "cameraPermission": "Blood Donor Finder needs access to your camera so you can take a profile picture."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#D32F2F"
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-image"
+    ]
+  }
+}

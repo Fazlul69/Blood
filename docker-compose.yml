@@ -1,0 +1,36 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: blood
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot", "password"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "mysql://root:password@mysql:3306/blood"
+      JWT_SECRET: "dev-secret-change-me"
+      PUBLIC_BASE_URL: "http://localhost:4000"
+      PORT: "4000"
+    ports:
+      - "4000:4000"
+    volumes:
+      - backend-uploads:/app/uploads/profile-photos
+
+volumes:
+  mysql-data:
+  backend-uploads:

@@ -2,7 +2,21 @@
 
 Node.js + Express + TypeScript + Prisma (MySQL) API for the Blood donor-finder app.
 
-## Setup
+## Run with Docker (easiest — includes MySQL)
+
+From the repo root:
+
+```
+docker compose up --build
+```
+
+This starts a MySQL 8 container plus the backend (built from `backend/Dockerfile`), runs `prisma migrate deploy` automatically on boot, and serves the API at `http://localhost:4000`. Uploaded profile photos and the MySQL data both persist in named Docker volumes across restarts.
+
+- To seed default settings/admin: `docker compose exec backend npm run prisma:seed`
+- If testing from a phone/emulator (not just your browser/Postman), override `PUBLIC_BASE_URL` in `docker-compose.yml` to your machine's LAN IP, e.g. `http://192.168.1.20:4000`, and restart with `docker compose up -d --build`.
+- Logs: `docker compose logs -f backend`
+
+## Manual setup (without Docker)
 
 1. `npm install`
 2. Copy `.env.example` to `.env` and fill in:
