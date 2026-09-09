@@ -1,5 +1,9 @@
+# Debian-based "slim" images, not alpine — Prisma's query engine binaries need
+# glibc + OpenSSL, which alpine (musl libc) doesn't have by default and requires
+# extra binaryTargets config to work around. Slim avoids that whole problem class.
+
 # --- build stage: install deps, generate Prisma client, compile TypeScript ---
-FROM node:22-alpine AS build
+FROM node:22-slim AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -10,7 +14,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # --- runtime stage: only what's needed to run the compiled server ---
-FROM node:22-alpine AS runtime
+FROM node:22-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -23,7 +27,7 @@ RUN mkdir -p uploads/profile-photos
 
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
-  CMD wget -qO- http://localhost:4000/health || exit 1
+  CMD node -e "fetch('http://localhost:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 # Applies any pending migrations, then starts the server.
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
