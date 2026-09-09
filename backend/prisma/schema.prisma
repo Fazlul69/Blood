@@ -1,5 +1,9 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // "native" covers local dev; the debian targets cover Railway (or any host)
+  // regardless of whether it builds with our Dockerfile (Debian slim, OpenSSL 3.0)
+  // or falls back to a Nixpacks default image (older Debian, OpenSSL 1.1).
+  binaryTargets = ["native", "debian-openssl-3.0.x", "debian-openssl-1.1.x"]
 }
 
 datasource db {
