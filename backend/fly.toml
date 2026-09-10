@@ -1,0 +1,30 @@
+# Fly.io config for the backend. Deploy from this directory: `fly deploy`
+# (Fly auto-detects the Dockerfile here.)
+#
+# Before the first successful deploy you MUST set these secrets — the app
+# crash-loops without DATABASE_URL:
+#   fly secrets set DATABASE_URL="mysql://USER:PASS@HOST:PORT/blood"
+#   fly secrets set JWT_SECRET="<a long random string>"
+#   fly secrets set PUBLIC_BASE_URL="https://blood.fly.dev"
+#
+# Fly.io has no managed MySQL — point DATABASE_URL at an external provider
+# (PlanetScale, Aiven, Railway MySQL, TiDB Cloud, …) or a MySQL you host yourself.
+
+app = "blood"
+primary_region = "bom" # Mumbai — change to whichever Fly region is closest to your users
+
+[build]
+
+[env]
+  PORT = "4000"
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
